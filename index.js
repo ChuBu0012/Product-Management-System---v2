@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const mysql = require("mysql");
-const port = 3000;
+const port = process.env.PORT || 8080;
 
 const con = mysql.createConnection({
   host: "localhost",
@@ -58,7 +58,7 @@ const getProduct = (req, res) => {
       next(err);
       return;
     }
-    res.json(results);
+    res.json(results[0]);
   });
 };
 
@@ -84,7 +84,7 @@ const createProduct = (req, res) => {
         next(err);
         return;
       }
-      res.json(results);
+      res.status(200).json(results);
     }
   );
 };
@@ -126,7 +126,7 @@ const updateProduct = (req, res) => {
           next(err);
           return;
         }
-        res.json(updateResults);
+        res.status(200).json(updateResults);
       }
     );
   });
@@ -139,25 +139,27 @@ const deleteProduct = (req, res) => {
       next(err);
       return;
     }
-    res.json(result);
+    res.status(200).json(result);
   });
 };
 
 app.use(express.json());
 
-// middleware handle error
+// Middleware to handle errors
 app.use(errorHandler);
 
 app.get("/products", getProducts);
 
-app.get("/product/:id", getProduct);
+app.get("/products/:id", getProduct);
 
-app.post("/product", validateInputData, createProduct);
+app.post("/products", validateInputData, createProduct);
 
-app.post("/product/:id", validateInputData, updateProduct);
+app.put("/products/:id", validateInputData, updateProduct);
 
-app.delete("/product/:id", deleteProduct);
+app.delete("/products/:id", deleteProduct);
 
-app.listen(port, () => {
-  console.log("Server is running on port 3000");
+const server = app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
+
+module.exports = { app, server, con };
